@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class PaymentEventListener {
 
     private final OrderRepository orderRepository;
-    private final KafkaTemplate<String, OrderUpdatedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @KafkaListener(topics = "payment-completed", groupId = "order-service-group")
     public void handlePaymentCompleted(PaymentCompletedEvent event) {
