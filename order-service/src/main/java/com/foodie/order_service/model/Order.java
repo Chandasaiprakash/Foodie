@@ -22,7 +22,7 @@ public class Order {
 
     @Column(nullable = false)
     private String customerEmail;
-
+    private String restaurantName;
     private String customerPhone;
     private String restaurantId;
 
@@ -33,7 +33,9 @@ public class Order {
     private Double total;
 
     private String status; // CREATED, CONFIRMED, PREPARING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
-
+    private String paymentStatus; // PENDING, SUCCESS, FAILED
     private Instant createdAt;
+
+
 }
 

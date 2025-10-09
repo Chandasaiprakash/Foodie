@@ -1,7 +1,7 @@
 package com.foodie.payment_service.listener;
 
 
-import com.foodie.payment_service.event.OrderCreatedEvent;
+import com.foodie.common.events.OrderCreatedEvent;
 import com.foodie.payment_service.model.Payment;
 import com.foodie.payment_service.repository.PaymentRepository;
 import com.foodie.payment_service.service.PaymentService;

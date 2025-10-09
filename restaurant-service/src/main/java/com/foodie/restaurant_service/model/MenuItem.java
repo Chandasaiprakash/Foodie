@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class MenuItem {
     @Id
     private String id;               // unique menu item ID
-    private String restaurantId;     // link to Restaurant
+    private String restaurantName;     // link to Restaurant
     private String name;
     private String description;
     private double price;

@@ -20,9 +20,9 @@ public class RestaurantController {
         return restaurantService.getAll();
     }
 
-    @GetMapping("/{id}")
-    public Restaurant getById(@PathVariable String id) {
-        return restaurantService.getById(id);
+    @GetMapping("/{restaurantId}")
+    public Restaurant getByRestaurantId(@PathVariable String restaurantId) {
+        return restaurantService.getByRestaurantId(restaurantId);
     }
 
     @PostMapping
@@ -30,14 +30,14 @@ public class RestaurantController {
         return restaurantService.save(restaurant);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        restaurantService.delete(id);
+    @DeleteMapping("/{restaurantId}")
+    public void delete(@PathVariable String restaurantId) {
+        restaurantService.delete(restaurantId);
     }
 
     @GetMapping("/search")
-    public List<Restaurant> search(@RequestParam String name) {
-        return restaurantService.searchByName(name);
+    public List<Restaurant> search(@RequestParam String restaurantName) {
+        return restaurantService.searchByRestaurantName(restaurantName);
     }
 
     @GetMapping("/filter")

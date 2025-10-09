@@ -14,9 +14,9 @@ public class MenuItemController {
 
     private final MenuItemService menuItemService;
 
-    @GetMapping("/restaurant/{restaurantId}")
-    public List<MenuItem> getByRestaurant(@PathVariable String restaurantId) {
-        return menuItemService.getByRestaurant(restaurantId);
+    @GetMapping("/restaurant/{restaurantName}")
+    public List<MenuItem> getByRestaurant(@PathVariable String restaurantName) {
+        return menuItemService.getByRestaurant(restaurantName);
     }
 
     @PostMapping

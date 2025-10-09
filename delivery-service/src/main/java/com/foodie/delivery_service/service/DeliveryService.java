@@ -2,8 +2,8 @@ package com.foodie.delivery_service.service;
 
 
 import com.foodie.delivery_service.client.OrderServiceClient;
-import com.foodie.delivery_service.event.DeliveryEvent;
-import com.foodie.delivery_service.event.PaymentCompletedEvent;
+import com.foodie.common.events.DeliveryEvent;
+import com.foodie.common.events.PaymentCompletedEvent;
 import com.foodie.delivery_service.model.Delivery;
 import com.foodie.delivery_service.model.DeliveryPartner;
 import com.foodie.delivery_service.repository.DeliveryPartnerRepository;

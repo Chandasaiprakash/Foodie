@@ -17,20 +17,20 @@ public class RestaurantService {
         return restaurantRepository.findAll();
     }
 
-    public Restaurant getById(String id) {
-        return restaurantRepository.findById(id).orElseThrow();
+    public Restaurant getByRestaurantId(String restaurantId) {
+        return restaurantRepository.findByRestaurantId(restaurantId);
     }
 
     public Restaurant save(Restaurant restaurant) {
         return restaurantRepository.save(restaurant);
     }
 
-    public void delete(String id) {
-        restaurantRepository.deleteById(id);
+    public void delete(String restaurantId) {
+        restaurantRepository.deleteByRestaurantId(restaurantId);
     }
 
-    public List<Restaurant> searchByName(String name) {
-        return restaurantRepository.findByNameContainingIgnoreCase(name);
+    public List<Restaurant> searchByRestaurantName(String restaurantName) {
+        return restaurantRepository.findByRestaurantNameContainingIgnoreCase(restaurantName);
     }
 
     public List<Restaurant> filterByCuisine(String cuisine) {

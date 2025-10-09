@@ -1,7 +1,8 @@
 package com.foodie.order_service.service;
 
-import com.foodie.order_service.event.OrderCreatedEvent;
+
 import com.foodie.order_service.model.Order;
+import com.foodie.common.events.OrderCreatedEvent;
 import com.foodie.order_service.model.OrderItem;
 import com.foodie.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,11 @@ public class OrderService {
         order.setCustomerEmail(customerEmail);
         order.setOrderUuid(UUID.randomUUID().toString());
         order.setStatus("CREATED");
+        order.setPaymentStatus("PENDING"); // ✅ default payment status
+
         order.setCreatedAt(Instant.now());
         order.setRestaurantId(orderRequest.getRestaurantId());
+        order.setRestaurantName(orderRequest.getRestaurantName());
         order.setCustomerPhone(orderRequest.getCustomerPhone());
         order.setItems(orderRequest.getItems());
 
@@ -48,6 +52,7 @@ public class OrderService {
                 .customerEmail(saved.getCustomerEmail())
                 .customerPhone(saved.getCustomerPhone())
                 .restaurantId(saved.getRestaurantId())
+                .restaurantName(saved.getRestaurantName())
                 .items(saved.getItems().stream()
                         .map(i -> new OrderCreatedEvent.OrderItemDto(i.getName(), i.getQuantity(), i.getPrice()))
                         .collect(Collectors.toList()))
@@ -58,7 +63,7 @@ public class OrderService {
         return saved;
     }
 
-    // Fetch order by ID
+   /* // Fetch order by ID
     public Optional<Order> getById(Long id) {
         return orderRepository.findById(id);
     }
@@ -67,19 +72,19 @@ public class OrderService {
     public Optional<Order> getByUuid(String uuid) {
         return orderRepository.findByOrderUuid(uuid);
     }
-
+*/
     // Fetch orders by customer email
     public List<Order> getByCustomerEmail(String customerEmail) {
         return orderRepository.findByCustomerEmail(customerEmail);
     }
 
     // Check ownership
-    public boolean isOwnedBy(String orderUuid, String email) {
+    /*public boolean isOwnedBy(String orderUuid, String email) {
         return orderRepository.findByOrderUuid(orderUuid)
                 .map(o -> o.getCustomerEmail().equalsIgnoreCase(email))
                 .orElse(false);
-    }
-
+    }*/
+/*
     // Fetch order by ID with ownership validation
     public Optional<Order> getByIdIfOwned(Long id, String email) {
         return getById(id).filter(order -> order.getCustomerEmail().equalsIgnoreCase(email));
@@ -88,5 +93,5 @@ public class OrderService {
     // Fetch order by UUID with ownership validation
     public Optional<Order> getByUuidIfOwned(String uuid, String email) {
         return getByUuid(uuid).filter(order -> order.getCustomerEmail().equalsIgnoreCase(email));
-    }
+    }*/
 }

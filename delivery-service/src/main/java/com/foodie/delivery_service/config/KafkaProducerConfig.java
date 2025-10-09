@@ -1,7 +1,7 @@
 package com.foodie.delivery_service.config;
 
 
-import com.foodie.delivery_service.event.DeliveryEvent;
+import com.foodie.common.events.DeliveryEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.*;

@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface RestaurantRepository extends MongoRepository<Restaurant, String> {
     List<Restaurant> findByCuisineType(String cuisineType);
-    List<Restaurant> findByNameContainingIgnoreCase(String name);
+    Restaurant deleteByRestaurantId(String restaurantId);
+    Restaurant findByRestaurantId(String restaurantId);
+    List<Restaurant> findByRestaurantNameContainingIgnoreCase(String restaurantName);
 }
 

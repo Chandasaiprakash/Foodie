@@ -1,7 +1,7 @@
 package com.foodie.delivery_service.listener;
 
 
-import com.foodie.delivery_service.event.PaymentCompletedEvent;
+import com.foodie.common.events.PaymentCompletedEvent;
 import com.foodie.delivery_service.model.Delivery;
 import com.foodie.delivery_service.service.DeliveryService;
 import lombok.RequiredArgsConstructor;

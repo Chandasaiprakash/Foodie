@@ -1,7 +1,7 @@
 package com.foodie.notification_service.controller;
 
 
-import com.foodie.notification_service.event.DeliveryEvent;
+import com.foodie.common.events.DeliveryEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

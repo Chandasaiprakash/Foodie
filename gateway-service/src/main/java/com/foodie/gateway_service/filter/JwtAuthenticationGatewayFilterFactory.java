@@ -38,13 +38,17 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 return onError(exchange, "Invalid or expired JWT token");
             }
 
-            // ✅ Extract claims
+            // ✅ Extract correct values
             Claims claims = jwtUtil.getClaims(token);
-            String email = claims.getSubject(); // "sub" from JWT
+            String email = claims.get("email", String.class); // correct field
+            String userId = claims.getSubject(); // "sub" = userId
 
-            // ✅ Add email into request headers
+            // ✅ Set headers cleanly (overwrite, don't append)
             ServerWebExchange modifiedExchange = exchange.mutate()
-                    .request(r -> r.headers(headers -> headers.add("X-User-Email", email)))
+                    .request(r -> r.headers(headers -> {
+                        headers.set("X-User-Email", email);
+                        headers.set("X-User-Id", userId);
+                    }))
                     .build();
 
             return chain.filter(modifiedExchange);

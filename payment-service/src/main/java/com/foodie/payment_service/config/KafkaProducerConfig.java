@@ -1,7 +1,7 @@
 package com.foodie.payment_service.config;
 
 
-import com.foodie.payment_service.event.PaymentCompletedEvent;
+import com.foodie.common.events.PaymentCompletedEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

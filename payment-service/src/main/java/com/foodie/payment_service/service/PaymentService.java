@@ -1,7 +1,7 @@
 package com.foodie.payment_service.service;
 
-import com.foodie.payment_service.event.OrderCreatedEvent;
-import com.foodie.payment_service.event.PaymentCompletedEvent;
+import com.foodie.common.events.OrderCreatedEvent;
+import com.foodie.common.events.PaymentCompletedEvent;
 import com.foodie.payment_service.model.Payment;
 import com.foodie.payment_service.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +62,8 @@ public class PaymentService {
                 .build();
 
         kafkaTemplate.send(TOPIC, payment.getOrderUuid(), event);
+        log.info("Publishing PaymentCompletedEvent: {}", event);
+
     }
 
     public Payment getByPaymentUuid(String paymentUuid) {

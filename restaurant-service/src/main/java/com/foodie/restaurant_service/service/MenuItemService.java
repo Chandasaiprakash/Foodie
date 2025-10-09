@@ -13,8 +13,8 @@ public class MenuItemService {
 
     private final MenuItemRepository menuItemRepository;
 
-    public List<MenuItem> getByRestaurant(String restaurantId) {
-        return menuItemRepository.findByRestaurantId(restaurantId);
+    public List<MenuItem> getByRestaurant(String restaurantName) {
+        return menuItemRepository.findByRestaurantName(restaurantName);
     }
 
     public MenuItem add(MenuItem menuItem) {

@@ -1,7 +1,7 @@
 package com.foodie.order_service.config;
 
 
-import com.foodie.order_service.event.OrderCreatedEvent;
+import com.foodie.common.events.OrderCreatedEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

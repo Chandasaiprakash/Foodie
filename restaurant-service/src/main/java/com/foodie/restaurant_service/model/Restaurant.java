@@ -14,8 +14,8 @@ import java.util.List;
 @Document(collection = "restaurants")
 public class Restaurant {
     @Id
-    private String id;
-    private String name;
+    private String restaurantId;
+    private String restaurantName;
     private String address;
     private String cuisineType;
     private double rating;
