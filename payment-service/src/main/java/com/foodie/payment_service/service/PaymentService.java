@@ -23,6 +23,10 @@ public class PaymentService {
 
     private static final String TOPIC = "payment-completed";
 
+    /**
+     * Called when OrderCreatedEvent is received.
+     * We only create a payment entry in PENDING state here.
+     */
     @Transactional
     public Payment processPayment(OrderCreatedEvent orderEvent) {
         Payment payment = Payment.builder()
@@ -30,30 +34,37 @@ public class PaymentService {
                 .customerEmail(orderEvent.getCustomerEmail())
                 .amount(orderEvent.getTotal())
                 .method("UPI")
-                .status("SUCCESS")
+                .status("PENDING") // ✅ only pending now
                 .createdAt(Instant.now())
                 .paymentUuid(UUID.randomUUID().toString())
                 .build();
 
         Payment saved = paymentRepository.save(payment);
 
-        publishPaymentCompletedEvent(saved);
-        log.info("Payment processed for order {} with status {}", saved.getOrderUuid(), saved.getStatus());
+        log.info("💰 Payment record created for order {} with status {}", saved.getOrderUuid(), saved.getStatus());
         return saved;
     }
 
-    public Payment manualPayment(Payment payment) {
-        payment.setCreatedAt(Instant.now());
-        payment.setPaymentUuid(UUID.randomUUID().toString());
-        if (payment.getStatus() == null) payment.setStatus("SUCCESS");
+    /**
+     * Called when user clicks “Pay Now” in frontend.
+     * Marks payment as SUCCESS and publishes PaymentCompletedEvent.
+     */
+    @Transactional
+    public Payment completePayment(String orderUuid) {
+        Payment payment = paymentRepository.findByOrderUuid(orderUuid)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderUuid));
 
-        Payment saved = paymentRepository.save(payment);
-        publishPaymentCompletedEvent(saved);
-        log.info("Manual payment processed for order {} with status {}", saved.getOrderUuid(), saved.getStatus());
-        return saved;
+        payment.setStatus("SUCCESS");
+        paymentRepository.save(payment);
+
+        publishPaymentCompletedEvent(payment);
+        log.info("✅ Payment completed for order {} by {}", payment.getOrderUuid(), payment.getCustomerEmail());
+        return payment;
     }
 
-    private void publishPaymentCompletedEvent(Payment payment) {
+    public void publishPaymentCompletedEvent(Payment payment) {
         PaymentCompletedEvent event = PaymentCompletedEvent.builder()
                 .orderUuid(payment.getOrderUuid())
                 .customerEmail(payment.getCustomerEmail())
@@ -62,13 +73,13 @@ public class PaymentService {
                 .build();
 
         kafkaTemplate.send(TOPIC, payment.getOrderUuid(), event);
-        log.info("Publishing PaymentCompletedEvent: {}", event);
-
+        log.info("📢 Published PaymentCompletedEvent: {}", event);
     }
 
     public Payment getByPaymentUuid(String paymentUuid) {
         return paymentRepository.findByPaymentUuid(paymentUuid).orElse(null);
     }
+
 
     public List<Payment> getByOrderUuid(String orderUuid) {
         return paymentRepository.findByOrderUuid(orderUuid);
@@ -84,12 +95,20 @@ public class PaymentService {
         return paymentRepository.save(existing);
     }
 
-    // FIXED: Changed return type from Payment to List<Payment>
     public List<Payment> getByCustomerEmail(String customerEmail) {
         return paymentRepository.findByCustomerEmail(customerEmail);
     }
 
     public Payment getById(Long id) {
         return paymentRepository.findById(id).orElse(null);
+    }
+    public Payment manualPayment(Payment payment) {
+        payment.setCreatedAt(Instant.now());
+        payment.setPaymentUuid(UUID.randomUUID().toString());
+        if (payment.getStatus() == null) payment.setStatus("SUCCESS");
+        Payment saved = paymentRepository.save(payment);
+        publishPaymentCompletedEvent(saved);
+        log.info("Manual payment processed for order {} with status {}", saved.getOrderUuid(), saved.getStatus());
+        return saved;
     }
 }

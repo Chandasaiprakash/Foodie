@@ -78,20 +78,26 @@ public class OrderService {
         return orderRepository.findByCustomerEmail(customerEmail);
     }
 
+    @Transactional
+    public void deleteByOrderUuid(String orderUuid) {
+        orderRepository.deleteByOrderUuid(orderUuid);
+    }
+
+
     // Check ownership
     /*public boolean isOwnedBy(String orderUuid, String email) {
         return orderRepository.findByOrderUuid(orderUuid)
                 .map(o -> o.getCustomerEmail().equalsIgnoreCase(email))
                 .orElse(false);
     }*/
-/*
+
     // Fetch order by ID with ownership validation
     public Optional<Order> getByIdIfOwned(Long id, String email) {
         return getById(id).filter(order -> order.getCustomerEmail().equalsIgnoreCase(email));
     }
 
-    // Fetch order by UUID with ownership validation
+
     public Optional<Order> getByUuidIfOwned(String uuid, String email) {
         return getByUuid(uuid).filter(order -> order.getCustomerEmail().equalsIgnoreCase(email));
-    }*/
+    }
 }

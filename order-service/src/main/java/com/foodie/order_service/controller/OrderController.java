@@ -32,7 +32,7 @@ public class OrderController {
     }
 
 
-/*    // Get order by DB id with ownership validation
+
     @GetMapping("/id/{id}")
     public ResponseEntity<Order> getById(
             @PathVariable Long id,
@@ -41,9 +41,9 @@ public class OrderController {
         return orderService.getByIdIfOwned(id, customerEmail)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(403).build()); // 403 if not owned
-    }*/
+    }
 
-  /*  // Get order by UUID with ownership validation
+
     @GetMapping("/{orderUuid}")
     public ResponseEntity<Order> getByUuid(
             @PathVariable String orderUuid,
@@ -52,7 +52,7 @@ public class OrderController {
         return orderService.getByUuidIfOwned(orderUuid, customerEmail)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(403).build());
-    }*/
+
 
     // Get all orders of a customer
     @GetMapping("customer/{email}")
@@ -63,6 +63,12 @@ public class OrderController {
         List<Order> list = orderService.getByCustomerEmail(email);
         return ResponseEntity.ok(list);
     }
+
+  /*  @DeleteMapping("/{orderUuid}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable String orderUuid) {
+        orderService.deleteByOrderUuid(orderUuid);
+        return ResponseEntity.noContent().build();
+    }*/
 
 
    /* // Ownership validation for external services or WebSocket

@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerEmail(String customerEmail);
     Optional<Order> findByOrderUuid(String orderUuid);
+
 }
 
