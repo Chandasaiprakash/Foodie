@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "menu_items")
 public class MenuItem {
     @Id
     private String id;               // unique menu item ID
@@ -17,4 +16,5 @@ public class MenuItem {
     private String description;
     private double price;
     private boolean available;
+
 }

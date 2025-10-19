@@ -6,8 +6,8 @@ import com.foodie.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -27,14 +27,15 @@ public class UserController {
     }
 
     @GetMapping("/email/{email}")
-    public User getUserByEmail(@PathVariable String email) {
+    public Optional<User> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email);
     }
 
     @GetMapping("/username/{username}")
-    public User getUserByUsername(@PathVariable String username) {
+    public Optional<User> getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
+
     @PostMapping
     public User addUser(@RequestBody User user) {
         return userService.saveUser(user);
@@ -42,12 +43,10 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build(); // 204
-        } else {
-            return ResponseEntity.notFound().build(); // 404
-        }
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build(); // 204
     }
+
+
 }
 

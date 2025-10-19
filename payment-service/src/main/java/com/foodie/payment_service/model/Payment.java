@@ -26,9 +26,11 @@ public class Payment {
     private Double amount;
 
     private String method;  // UPI, CARD, WALLET, COD
+    private String transactionId;
     private String status;  // SUCCESS, FAILED, PENDING
 
     private Instant createdAt;
+    private String failureReason;
 
     @PrePersist
     public void prePersist() {

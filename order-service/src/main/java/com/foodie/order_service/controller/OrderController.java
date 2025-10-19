@@ -1,6 +1,7 @@
 package com.foodie.order_service.controller;
 
 import com.foodie.order_service.model.Order;
+import com.foodie.order_service.repository.OrderRepository;
 import com.foodie.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -9,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
@@ -18,6 +22,7 @@ public class OrderController {
 
     private static final Logger log = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     // Create order
     @PostMapping
@@ -52,7 +57,7 @@ public class OrderController {
         return orderService.getByUuidIfOwned(orderUuid, customerEmail)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(403).build());
-
+    }
 
     // Get all orders of a customer
     @GetMapping("customer/{email}")
@@ -64,11 +69,47 @@ public class OrderController {
         return ResponseEntity.ok(list);
     }
 
-  /*  @DeleteMapping("/{orderUuid}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable String orderUuid) {
-        orderService.deleteByOrderUuid(orderUuid);
-        return ResponseEntity.noContent().build();
-    }*/
+        @PutMapping("/{orderUuid}/payment-status")
+        public ResponseEntity<String> updatePaymentStatus(@PathVariable String orderUuid,
+                @RequestParam String status) {
+            Order order = orderRepository.findByOrderUuid(orderUuid)
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+
+            order.setPaymentStatus(status);
+            orderRepository.save(order);
+
+            return ResponseEntity.ok("Payment status updated to " + status);
+        }
+
+
+    @DeleteMapping("/{orderUuid}")
+    public ResponseEntity<?> deleteOrder(@PathVariable String orderUuid) {
+        boolean deleted = orderService.deleteOrder(orderUuid);
+        if (deleted) {
+            return ResponseEntity.ok(Map.of("message", "Order deleted successfully"));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("error", "Order not found"));
+        }
+    }
+
+    @PostMapping("/reorder")
+    public ResponseEntity<Order> reorder(@RequestBody Order originalOrder) {
+        Order newOrder = new Order();
+        newOrder.setOrderUuid(UUID.randomUUID().toString());
+        newOrder.setCustomerEmail(originalOrder.getCustomerEmail());
+        newOrder.setRestaurantName(originalOrder.getRestaurantName());
+        newOrder.setItems(originalOrder.getItems());
+        newOrder.setTotal(originalOrder.getTotal());
+        newOrder.setStatus("CREATED");
+        newOrder.setPaymentStatus("PENDING");
+        newOrder.setCreatedAt(Instant.now());
+
+        Order saved = orderRepository.save(newOrder);
+        log.info("🔁 Reordered: {}", saved);
+        return ResponseEntity.ok(saved);
+    }
+
+
 
 
    /* // Ownership validation for external services or WebSocket

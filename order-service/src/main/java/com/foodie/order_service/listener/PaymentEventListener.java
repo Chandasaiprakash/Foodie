@@ -1,6 +1,7 @@
 package com.foodie.order_service.listener;
 
 import com.foodie.common.events.PaymentCompletedEvent;
+import com.foodie.common.events.PaymentFailedEvent;
 import com.foodie.common.events.OrderUpdatedEvent;
 import com.foodie.order_service.model.Order;
 import com.foodie.order_service.repository.OrderRepository;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import com.foodie.order_service.service.OrderService;
 
 @Component
 @RequiredArgsConstructor
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class PaymentEventListener {
 
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @KafkaListener(topics = "payment-completed", groupId = "order-service-group")
@@ -41,4 +44,12 @@ public class PaymentEventListener {
                     log.info("📢 Sent OrderUpdatedEvent: {}", updatedEvent);
                 }, () -> log.warn("⚠️ No order found for UUID: {}", event.getOrderUuid()));
     }
+
+    @KafkaListener(topics = "payment-events", groupId = "order-group")
+    public void handlePaymentFailedEvent(PaymentFailedEvent event) {
+        log.warn("❌ PaymentFailedEvent received for order {}: {}", event.getOrderUuid(), event.getReason());
+        orderService.updatePaymentStatus(event.getOrderUuid(), "FAILED");
+
+    }
+
 }

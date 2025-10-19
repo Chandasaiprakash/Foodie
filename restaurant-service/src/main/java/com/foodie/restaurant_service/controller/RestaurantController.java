@@ -2,8 +2,10 @@ package com.foodie.restaurant_service.controller;
 
 
 import com.foodie.restaurant_service.model.Restaurant;
+import com.foodie.restaurant_service.model.RestaurantDocument;
 import com.foodie.restaurant_service.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +20,15 @@ public class RestaurantController {
     @GetMapping
     public List<Restaurant> getAll() {
         return restaurantService.getAll();
+    }
+    /*@GetMapping("/search")
+    public List<Restaurant> search(@RequestParam String query) { // ⬅️ Renamed for clarity
+        return restaurantService.searchByText(query); // ⬅️ Changed method call
+    }*/
+
+    @GetMapping("/search")
+    public ResponseEntity<List<RestaurantDocument>> searchRestaurants(@RequestParam String query,@RequestParam(required = false) String address) {
+        return ResponseEntity.ok(restaurantService.searchRestaurants(query,address));
     }
 
     @GetMapping("/{restaurantId}")
@@ -35,10 +46,7 @@ public class RestaurantController {
         restaurantService.delete(restaurantId);
     }
 
-    @GetMapping("/search")
-    public List<Restaurant> search(@RequestParam String restaurantName) {
-        return restaurantService.searchByRestaurantName(restaurantName);
-    }
+
 
     @GetMapping("/filter")
     public List<Restaurant> filter(@RequestParam String cuisine) {

@@ -1,71 +1,94 @@
 package com.foodie.auth_service.controller;
 
 import com.foodie.auth_service.dto.*;
-import com.foodie.auth_service.model.User;
-import com.foodie.auth_service.repository.UserRepository;
+import feign.FeignException;
 import com.foodie.auth_service.security.JwtService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.foodie.auth_service.client.UserClient;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserRepository userRepository;
+    //private final UserRepository userRepository;
+    private final UserClient userClient;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest req) {
-        if (userRepository.existsByEmail(req.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        UserAuthDetails createdUser;
+        try {
+            // 1. Delegate user creation to the User Service
+            createdUser = userClient.createUser(req);
+        } catch (FeignException.Conflict e) {
+            // This happens if the user-service returns a 409 Conflict status
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists.");
         }
 
-        String role = (req.getRole() == null) ? "CUSTOMER" : req.getRole().toUpperCase();
-        User u = User.builder()
-                .username(req.getUsername())
-                .email(req.getEmail())
-                .passwordHash(passwordEncoder.encode(req.getPassword()))
-                .role(role)
-                .build();
-        userRepository.save(u);
-
-        // ✅ Fixed token generation - create proper claims
+        // 2. Generate a JWT for the newly registered user
         String token = jwtService.generateToken(
-                u.getId(),
-                u.getEmail(),
-                u.getRole(),
-                u.getUsername(),
+                createdUser.id(),
+                createdUser.email(),
+                createdUser.role(),
+                createdUser.username(),
                 1000L * 60 * 60 * 24 // 24 hours
         );
 
-        return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getUsername());
+        // 3. Return the token and user details
+        return new AuthResponse(
+                token,
+                createdUser.id(),
+                createdUser.email(),
+                createdUser.role(),
+                createdUser.username(),
+                createdUser.phoneNumber()
+        );
     }
+
+
+    @Value("${user-service.internal-secret}") // Inject the secret
+    private String internalSecret;
+
+    // NOTE on /register: For a full solution, /register should also call the
+    // User Service to create the user, but for now we focus on /login validation.
+    // If you remove UserRepository, /register will need a Feign POST call to User Service.
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest req) {
-        User u = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
 
-        if (!passwordEncoder.matches(req.getPassword(), u.getPasswordHash())) {
+        // 1. CALL USER SERVICE via Feign Client
+        UserAuthDetails userDetails;
+        try {
+            userDetails = userClient.getUserByEmailForAuth(req.getEmail(), internalSecret);
+        } catch (Exception e) {
+            // Feign converts 404 from User Service to a specific error.
+            // Map any failure to a generic "Invalid credentials" to prevent enumeration attacks.
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        // ✅ Fixed token generation
+        // 2. VALIDATE PASSWORD LOCALLY
+        if (!passwordEncoder.matches(req.getPassword(), userDetails.password())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+
+        // 3. GENERATE TOKEN using data from the User Service
         String token = jwtService.generateToken(
-                u.getId(),
-                u.getEmail(),
-                u.getRole(),
-                u.getUsername(),
+                userDetails.id(),
+                userDetails.email(),
+                userDetails.role(),
+                userDetails.username(),
                 1000L * 60 * 60 * 24 // 24 hours
         );
 
-        return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getUsername());
+        return new AuthResponse(token, userDetails.id(), userDetails.email(), userDetails.role(), userDetails.username(), userDetails.phoneNumber());
     }
 
     @GetMapping("/me")

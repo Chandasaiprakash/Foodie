@@ -8,6 +8,7 @@ import com.foodie.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -63,25 +65,45 @@ public class OrderService {
         return saved;
     }
 
-   /* // Fetch order by ID
+
     public Optional<Order> getById(Long id) {
         return orderRepository.findById(id);
     }
 
-    // Fetch order by UUID
+    public void updatePaymentStatus(String orderUuid, String status) {
+        Optional<Order> optionalOrder = orderRepository.findByOrderUuid(orderUuid);
+        if (optionalOrder.isEmpty()) return;
+
+        Order order = optionalOrder.get();
+        order.setPaymentStatus(status);
+        if (status.equals("FAILED")) {
+            order.setStatus("PAYMENT_FAILED");
+        }
+        orderRepository.save(order);
+        log.info("Order {} marked as {}", orderUuid, status);
+    }
+
+
+
     public Optional<Order> getByUuid(String uuid) {
         return orderRepository.findByOrderUuid(uuid);
     }
-*/
+
     // Fetch orders by customer email
     public List<Order> getByCustomerEmail(String customerEmail) {
         return orderRepository.findByCustomerEmail(customerEmail);
     }
 
     @Transactional
-    public void deleteByOrderUuid(String orderUuid) {
-        orderRepository.deleteByOrderUuid(orderUuid);
+    public boolean deleteOrder(String orderUuid) {
+        Optional<Order> order = orderRepository.findByOrderUuid(orderUuid);
+        if (order.isPresent()) {
+            orderRepository.delete(order.get());
+            return true;
+        }
+        return false;
     }
+
 
 
     // Check ownership

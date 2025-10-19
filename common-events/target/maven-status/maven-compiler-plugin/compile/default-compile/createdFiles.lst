@@ -1,3 +1,4 @@
+com\foodie\common\events\PaymentFailedEvent$PaymentFailedEventBuilder.class
 com\foodie\common\events\OrderUpdatedEvent$OrderUpdatedEventBuilder.class
 com\foodie\common\events\App.class
 com\foodie\common\events\PaymentCompletedEvent.class
@@ -6,5 +7,6 @@ com\foodie\common\events\DeliveryEvent$DeliveryEventBuilder.class
 com\foodie\common\events\OrderUpdatedEvent.class
 com\foodie\common\events\OrderCreatedEvent.class
 com\foodie\common\events\PaymentCompletedEvent$PaymentCompletedEventBuilder.class
+com\foodie\common\events\PaymentFailedEvent.class
 com\foodie\common\events\DeliveryEvent.class
 com\foodie\common\events\OrderCreatedEvent$OrderItemDto.class
