@@ -24,6 +24,11 @@ public class RestaurantService {
         return restaurantRepository.findAll();
     }
 
+    public List<Restaurant> getRestaurantByCity(String address) {
+        return restaurantRepository.findByAddress(address);
+    }
+
+
     public Restaurant getByRestaurantId(String restaurantId) {
         return restaurantRepository.findByRestaurantId(restaurantId);
     }

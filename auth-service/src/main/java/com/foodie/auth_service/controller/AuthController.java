@@ -39,6 +39,7 @@ public class AuthController {
                 createdUser.email(),
                 createdUser.role(),
                 createdUser.username(),
+                createdUser.phoneNumber(),
                 1000L * 60 * 60 * 24 // 24 hours
         );
 
@@ -85,6 +86,7 @@ public class AuthController {
                 userDetails.email(),
                 userDetails.role(),
                 userDetails.username(),
+                userDetails.phoneNumber(),
                 1000L * 60 * 60 * 24 // 24 hours
         );
 
@@ -110,9 +112,10 @@ public class AuthController {
                 Long.parseLong(claims.getSubject()), // Id
                 claims.get("email", String.class),
                 claims.get("role", String.class),
-                claims.get("username", String.class)
+                claims.get("username", String.class),
+                claims.get("phoneNumber", String.class)
         );
     }
 
-    public record MeResponse(Long id, String email, String role, String username) {}
+    public record MeResponse(Long id, String email, String role, String username, String phoneNumber) {}
 }

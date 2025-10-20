@@ -17,10 +17,19 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
 
-    @GetMapping
+   /* @GetMapping
     public List<Restaurant> getAll() {
         return restaurantService.getAll();
+    }*/
+
+    // ✨ UPDATED: Endpoint to get all restaurants now accepts location params
+    @GetMapping
+    public ResponseEntity<List<Restaurant>> getRestaurantsByLocation(
+            @RequestParam String location) {
+
+        return ResponseEntity.ok(restaurantService.getRestaurantByCity(location));
     }
+
     /*@GetMapping("/search")
     public List<Restaurant> search(@RequestParam String query) { // ⬅️ Renamed for clarity
         return restaurantService.searchByText(query); // ⬅️ Changed method call

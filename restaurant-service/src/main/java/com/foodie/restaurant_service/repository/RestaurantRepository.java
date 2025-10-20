@@ -14,6 +14,7 @@ public interface RestaurantRepository extends MongoRepository<Restaurant, String
     List<Restaurant> findByCuisineType(String cuisineType);
     Restaurant findByRestaurantId(String restaurantId);
     Restaurant deleteByRestaurantId(String restaurantId);
+    List<Restaurant> findByAddress(String address);
     // 2. Remove the basic search method (findByRestaurantNameContainingIgnoreCase)
 
     // 3. New, advanced full-text search method
