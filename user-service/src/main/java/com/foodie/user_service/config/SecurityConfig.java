@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Allow POST requests to /users for registration without authentication
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/internal/**").permitAll()
                         // Secure all other requests
                         .anyRequest().authenticated()
