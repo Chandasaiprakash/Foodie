@@ -109,6 +109,24 @@ public class OrderController {
         return ResponseEntity.ok(saved);
     }
 
+    @GetMapping("/customer/{email}/paged")
+    public ResponseEntity<Map<String, Object>> getPagedOrders(
+            @PathVariable String email,
+            @RequestHeader("X-User-Email") String customerEmail,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            @RequestParam(required = false) String search
+    ) {
+        if (!email.equalsIgnoreCase(customerEmail)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Map<String, Object> result = orderService.getPagedOrders(email, page, size, sort, search);
+        return ResponseEntity.ok(result);
+    }
+
+
 
 
 

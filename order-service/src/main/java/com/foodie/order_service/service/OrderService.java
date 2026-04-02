@@ -6,15 +6,17 @@ import com.foodie.common.events.OrderCreatedEvent;
 import com.foodie.order_service.model.OrderItem;
 import com.foodie.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -122,4 +124,30 @@ public class OrderService {
     public Optional<Order> getByUuidIfOwned(String uuid, String email) {
         return getByUuid(uuid).filter(order -> order.getCustomerEmail().equalsIgnoreCase(email));
     }
+
+    public Map<String, Object> getPagedOrders(String email, int page, int size, String sort, String search) {
+        String[] sortParts = sort.split(",");
+        String sortField = sortParts[0];
+        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        Page<Order> orderPage;
+
+        if (search != null && !search.isBlank()) {
+            orderPage = orderRepository.findByCustomerEmailAndRestaurantNameContainingIgnoreCase(email, search, pageable);
+        } else {
+            orderPage = orderRepository.findByCustomerEmail(email, pageable);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("orders", orderPage.getContent());
+        response.put("currentPage", orderPage.getNumber());
+        response.put("totalItems", orderPage.getTotalElements());
+        response.put("totalPages", orderPage.getTotalPages());
+        return response;
+    }
+
 }
