@@ -1,0 +1,66 @@
+name: CD — Deploy to EKS
+
+on:
+  workflow_run:
+    workflows: ["CI — Build, Test & Push"]
+    types: [ completed ]
+    branches: [ main ]
+
+env:
+  AWS_REGION: ap-south-1
+  EKS_CLUSTER: foodie-prod
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-south-1.amazonaws.com
+
+jobs:
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER }} \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.14.0'
+
+      - name: Deploy all services via Helm
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          helm upgrade --install foodie infra/helm/foodie \
+            --namespace foodie \
+            --create-namespace \
+            --set global.imageTag=$IMAGE_TAG \
+            --set global.registry=$ECR_REGISTRY \
+            --values infra/helm/foodie/values.yaml \
+            --wait \
+            --timeout 5m
+
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/order-service -n foodie
+          kubectl rollout status deployment/payment-service -n foodie
+          kubectl rollout status deployment/inventory-service -n foodie
+          kubectl rollout status deployment/delivery-service -n foodie
+          kubectl rollout status deployment/auth-service -n foodie
+          kubectl rollout status deployment/notification-service -n foodie
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Deployment failed — check EKS rollout status"

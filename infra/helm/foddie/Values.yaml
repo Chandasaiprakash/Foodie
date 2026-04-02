@@ -1,0 +1,112 @@
+global:
+  registry: ""         # set via --set at deploy time
+  imageTag: "latest"   # set via --set at deploy time
+  namespace: foodie
+
+services:
+  order-service:
+    replicaCount: 2
+    port: 8081
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodie_orders
+      REDIS_HOST: redis
+
+  payment-service:
+    replicaCount: 2
+    port: 8082
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodie_payments
+
+  inventory-service:
+    replicaCount: 2
+    port: 8083
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "512Mi"
+        cpu: "400m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MONGO_URI: mongodb://mongo:27017/foodie_catalog
+
+  delivery-service:
+    replicaCount: 2
+    port: 8084
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "512Mi"
+        cpu: "400m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+
+  auth-service:
+    replicaCount: 2
+    port: 8085
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "512Mi"
+        cpu: "400m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodie_auth
+
+  notification-service:
+    replicaCount: 1
+    port: 8086
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "256Mi"
+        cpu: "200m"
+    env:
+      SPRING_PROFILES_ACTIVE: prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+rollingUpdate:
+  maxUnavailable: 0
+  maxSurge: 1

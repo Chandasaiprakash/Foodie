@@ -1,0 +1,71 @@
+{{- range $name, $config := .Values.services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+    app: {{ $name }}
+    version: {{ $.Values.global.imageTag }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ $.Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ $.Values.rollingUpdate.maxSurge }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        version: {{ $.Values.global.imageTag }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: {{ $.Values.global.registry }}/foodie-{{ $name }}:{{ $.Values.global.imageTag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ $config.port }}
+          env:
+            {{- range $key, $value := $config.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          resources:
+            requests:
+              memory: {{ $config.resources.requests.memory }}
+              cpu: {{ $config.resources.requests.cpu }}
+            limits:
+              memory: {{ $config.resources.limits.memory }}
+              cpu: {{ $config.resources.limits.cpu }}
+          livenessProbe:
+            httpGet:
+              path: {{ $.Values.livenessProbe.httpGet.path }}
+              port: {{ $config.port }}
+            initialDelaySeconds: {{ $.Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ $.Values.readinessProbe.httpGet.path }}
+              port: {{ $config.port }}
+            initialDelaySeconds: {{ $.Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.readinessProbe.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+spec:
+  selector:
+    app: {{ $name }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ $config.port }}
+  type: ClusterIP
+  {{- end }}
