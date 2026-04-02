@@ -1,4 +1,9 @@
 # 🍔 FOODIE - Cloud-Native Distributed Food Ordering Platform
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=flat&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.2-6DB33F?style=flat&logo=springboot&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=flat&logo=apachekafka)
+![AWS](https://img.shields.io/badge/AWS_EKS-FF9900?style=flat&logo=amazonaws)
+![Terraform](https://img.shields.io/badge/Terraform-623CE4?style=flat&logo=terraform)
 
 > A production-grade microservices system built to demonstrate **Event-Driven Architecture**, **Infrastructure as Code**, and **High-Availability** patterns on AWS.
 
@@ -16,12 +21,6 @@ This project implements a distributed system using the **Saga Pattern (Orchestra
 2.  **Payment Processing:** `PaymentService` consumes event → Deducts balance (Idempotent) → Publishes `PaymentConfirmed`.
 3.  **Delivery Allocation:** `DeliveryService` allocates rider → Updates real-time status via **WebSockets**.
 4.  **Compensation:** If Payment fails, a `RollbackEvent` triggers compensating transactions in `OrderService`.
-
-![Java](https://img.shields.io/badge/Java_21-ED8B00?style=flat&logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.2-6DB33F?style=flat&logo=springboot&logoColor=white)
-![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=flat&logo=apachekafka)
-![AWS](https://img.shields.io/badge/AWS_EKS-FF9900?style=flat&logo=amazonaws)
-![Terraform](https://img.shields.io/badge/Terraform-623CE4?style=flat&logo=terraform)
 
 ---
 
